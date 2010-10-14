@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.littleshoot</groupId>
+    <artifactId>littleshoot-p2p</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+    <name>LittleShoot P2P Project</name>
+    <description>
+        Contains the full LittleShoot P2P networking stack.
+    </description>
+    <url></url>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-ice-rudp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-sip-bootstrap</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-sip-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-sip-http-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-sip-proxy</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-turn-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-xmpp</artifactId>
+        </dependency>
+    </dependencies>
+
+    <parent>
+        <groupId>org.lastbamboo</groupId>
+        <artifactId>lastbamboo</artifactId>
+        <version>1.0</version>
+    </parent>
+</project>
