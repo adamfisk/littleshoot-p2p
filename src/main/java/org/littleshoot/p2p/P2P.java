@@ -71,6 +71,12 @@ public class P2P {
      */
     private final static Logger log = LoggerFactory.getLogger(P2P.class);
     
+    static {
+        // Use Google Public DNS.
+        System.setProperty("sun.net.spi.nameservice.nameservers", 
+            "8.8.8.8,8.8.4.4");
+    }
+    
     /**
      * Creates a new LittleShoot P2P instance with all the default settings,
      * with TCP, UDP, and TURN relay transports all turned on.
@@ -143,8 +149,22 @@ public class P2P {
         
         final Protocol sipProtocol = new Protocol("sip", socketFactory, 80);
         Protocol.registerProtocol("sip", sipProtocol);
-        
         return client;
+    }
+    
+    /**
+     * Creates a new LittleShoot P2P instance with a custom configuration file
+     * and allowing custom classes for NAT PMP and UPnP mappings. 
+     * 
+     * @param streamDesc A configuration class allowing the caller to specify
+     * things like whether or not the use TCP, UDP, and TURN relay connections.
+     * @throws IOException If any of the necessary network configurations 
+     * cannot be established.
+     */
+    public static P2PSignalingClient newXmppP2PClient(
+        final IceMediaStreamDesc streamDesc) throws IOException {
+        return newXmppP2PClient(streamDesc, emptyNatPmpService(), 
+            emptyUpnpService());
     }
     
     /**
@@ -162,7 +182,6 @@ public class P2P {
         final IceMediaStreamDesc streamDesc, final NatPmpService natPmpService, 
         final UpnpService upnpService) throws IOException {
         log.info("Creating XMPP P2P instance");
-        
         final InetAddress localServerAddress = NetworkUtils.getLocalHost();
         
         // This listener listens for sockets the server side of P2P and 
@@ -178,16 +197,14 @@ public class P2P {
         // Now construct all the XMPP classes and link them to HTTP client.
         final P2PSignalingClient client = newXmppSignalingCLient(
             offerAnswerFactory, socketListener);
-        
+
+        // TODO: Log in here??
         //launcher.register(userId);
-        
-        //final XmppClientTracker xmppClientTracker = 
-        //    new DefaultXmppClientTracker();
+
         // Note the last argument for how long to wait before using a relay
         // is in seconds!!
         final XmppSocketFactory xmppSocketFactory = 
-            new DefaultXmppSocketFactory(client, 
-                offerAnswerFactory, 20);
+            new DefaultXmppSocketFactory(client, offerAnswerFactory, 20);
         
         final ProtocolSocketFactory socketFactory = 
             new XmppProtocolSocketFactory(xmppSocketFactory, 
@@ -200,18 +217,18 @@ public class P2P {
     private static P2PSignalingClient newXmppSignalingCLient(
         final OfferAnswerFactory offerAnswerFactory, 
         final SocketListener socketListener) {
-        return new XmppP2PSignalingClient(offerAnswerFactory, socketListener);
-        //return null;
+        // So there are really two classes that send relay ICE-negotiated 
+        // sockets to the HTTP server. The first is the "mapped" server above
+        // that accepts *incoming* sockets from the controlling offerer and
+        // forwards them. The second is created here that handles outgoing
+        // sockets created from the answerer to the offerer. They both do more
+        // or less the same thing, but one works for incoming, the other for
+        // outgoing.
+        final OfferAnswerListener offerAnswerListener = 
+            new OfferAnswerListenerImpl(socketListener);
+        
+        return new XmppP2PSignalingClient(offerAnswerFactory, offerAnswerListener);
     }
-
-    /*
-    private P2P(final ProtocolSocketFactory socketFactory, 
-        final P2PSignalingClient signalingClient) {
-        //this.signalingClient = signalingClient;
-        final Protocol sipProtocol = new Protocol("sip", socketFactory, 80);
-        Protocol.registerProtocol("sip", sipProtocol);
-    }
-    */
     
     private static OfferAnswerFactory newIceOfferAnswerFactory(
         final IceMediaStreamDesc streamDesc, 
@@ -289,12 +306,6 @@ public class P2P {
         
         return new SipClientLauncher(robustRegistrarFactory, sipUriFactory);
     }
-
-    /*
-    public P2PSignalingClient getSipClientLauncher() {
-        return this.signalingClient;
-    }
-    */
     
     private static NatPmpService emptyNatPmpService() {
         return new NatPmpService() {
