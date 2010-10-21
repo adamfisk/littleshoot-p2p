@@ -17,7 +17,7 @@ import org.lastbamboo.common.ice.rudp.IceMediaStreamFactoryImpl;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
 import org.lastbamboo.common.offer.answer.OfferAnswerListener;
 import org.lastbamboo.common.offer.answer.OfferAnswerListenerImpl;
-import org.lastbamboo.common.p2p.P2PSignalingClient;
+import org.lastbamboo.common.p2p.P2PClient;
 import org.lastbamboo.common.portmapping.NatPmpService;
 import org.lastbamboo.common.portmapping.PortMapListener;
 import org.lastbamboo.common.portmapping.UpnpService;
@@ -50,10 +50,10 @@ import org.lastbamboo.common.util.CandidateProvider;
 import org.lastbamboo.common.util.DnsSrvCandidateProvider;
 import org.lastbamboo.common.util.NetworkUtils;
 import org.lastbamboo.common.util.RelayingSocketHandler;
-import org.lastbamboo.common.util.ShootConstants;
 import org.lastbamboo.common.util.SocketListener;
 import org.littleshoot.commom.xmpp.DefaultXmppUriFactory;
-import org.littleshoot.commom.xmpp.XmppP2PSignalingClient;
+import org.littleshoot.commom.xmpp.DefaultXmppP2PClient;
+import org.littleshoot.commom.xmpp.XmppP2PClient;
 import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,9 +81,10 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newSipP2PClient() throws IOException {
+    public static P2PClient newSipP2PClient(final int portToRelayTo) 
+        throws IOException {
         return newSipP2PClient(new IceMediaStreamDesc(true, true, "message", 
-            "http", 1, true));
+            "http", 1, true), portToRelayTo);
     }
     
     /**
@@ -94,10 +95,11 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newSipP2PClient(
-        final IceMediaStreamDesc streamDesc) throws IOException {
+    public static P2PClient newSipP2PClient(
+        final IceMediaStreamDesc streamDesc, final int portToRelayTo) 
+        throws IOException {
         return newSipP2PClient(streamDesc, "", emptyNatPmpService(), 
-            emptyUpnpService());
+            emptyUpnpService(), portToRelayTo);
     }
     
     /**
@@ -110,11 +112,11 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newSipP2PClient(
-        final IceMediaStreamDesc streamDesc, final String protocol) 
-        throws IOException {
+    public static P2PClient newSipP2PClient(
+        final IceMediaStreamDesc streamDesc, final String protocol,
+        final int portToRelayTo) throws IOException {
         return newSipP2PClient(streamDesc, protocol, emptyNatPmpService(), 
-            emptyUpnpService());
+            emptyUpnpService(), portToRelayTo);
     }
 
     /**
@@ -128,22 +130,22 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newSipP2PClient(
+    public static P2PClient newSipP2PClient(
         final IceMediaStreamDesc streamDesc, final String protocol, 
-        final NatPmpService natPmpService, final UpnpService upnpService) 
-        throws IOException {
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final int portToRelayTo) throws IOException {
         log.info("Creating P2P instance");
         final InetAddress localServerAddress = NetworkUtils.getLocalHost();
         
         // This listener listens for sockets the server side of P2P and 
         // relays their data to the local HTTP server.
         final SocketListener socketListener = 
-            new RelayingSocketHandler(localServerAddress, 
-                ShootConstants.HTTP_PORT);
+            new RelayingSocketHandler(localServerAddress, portToRelayTo);
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
-                socketListener, localServerAddress);
+                socketListener, 
+                new InetSocketAddress(localServerAddress, portToRelayTo));
 
         // Now construct all the SIP classes and link them to HTTP client.
         final SipClientTracker sipClientTracker = new SipClientTrackerImpl();
@@ -151,7 +153,7 @@ public class P2P {
         
         // Note the last argument for how long to wait before using a relay
         // is in seconds!!
-        final P2PSignalingClient client = newSipClientLauncher(sipClientTracker,
+        final P2PClient client = newSipClientLauncher(sipClientTracker,
             offerAnswerFactory, socketListener, sipUriFactory, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
@@ -173,10 +175,11 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newXmppP2PClient(
-        final IceMediaStreamDesc streamDesc) throws IOException {
+    public static XmppP2PClient newXmppP2PClient(
+        final IceMediaStreamDesc streamDesc, final int portToRelayTo) 
+        throws IOException {
         return newXmppP2PClient(streamDesc, "shoot", emptyNatPmpService(), 
-            emptyUpnpService());
+            emptyUpnpService(), portToRelayTo);
     }
     
     /**
@@ -188,11 +191,11 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newXmppP2PClient(
-        final IceMediaStreamDesc streamDesc, final String protocol) 
-        throws IOException {
+    public static P2PClient newXmppP2PClient(
+        final IceMediaStreamDesc streamDesc, final String protocol,
+        final int portToRelayTo) throws IOException {
         return newXmppP2PClient(streamDesc, protocol, emptyNatPmpService(), 
-            emptyUpnpService());
+            emptyUpnpService(), portToRelayTo);
     }
     
     /**
@@ -206,25 +209,27 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PSignalingClient newXmppP2PClient(
+    public static XmppP2PClient newXmppP2PClient(
         final IceMediaStreamDesc streamDesc, final String protocol, 
-        final NatPmpService natPmpService, final UpnpService upnpService) 
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final int portToRelayTo) 
         throws IOException {
         log.info("Creating XMPP P2P instance");
         final InetAddress localServerAddress = NetworkUtils.getLocalHost();
+        final InetSocketAddress addressToRelayTo = 
+            new InetSocketAddress(localServerAddress, portToRelayTo);
         
         // This listener listens for sockets the server side of P2P and 
         // relays their data to the local HTTP server.
         final SocketListener socketListener = 
-            new RelayingSocketHandler(localServerAddress, 
-                ShootConstants.HTTP_PORT);
+            new RelayingSocketHandler(localServerAddress, portToRelayTo);
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
-                socketListener, localServerAddress);
+                socketListener, addressToRelayTo);
 
         // Now construct all the XMPP classes and link them to HTTP client.
-        final P2PSignalingClient client = newXmppSignalingCLient(
+        final XmppP2PClient client = newXmppSignalingCLient(
             offerAnswerFactory, socketListener, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
@@ -238,7 +243,7 @@ public class P2P {
         return client;
     }
     
-    private static P2PSignalingClient newXmppSignalingCLient(
+    private static XmppP2PClient newXmppSignalingCLient(
         final OfferAnswerFactory offerAnswerFactory, 
         final SocketListener socketListener, final int relayWaitTime) {
         // So there are really two classes that send relay ICE-negotiated 
@@ -251,7 +256,7 @@ public class P2P {
         final OfferAnswerListener offerAnswerListener = 
             new OfferAnswerListenerImpl(socketListener);
         
-        return new XmppP2PSignalingClient(offerAnswerFactory,
+        return new DefaultXmppP2PClient(offerAnswerFactory,
             offerAnswerListener, relayWaitTime);
     }
     
@@ -259,7 +264,7 @@ public class P2P {
         final IceMediaStreamDesc streamDesc, 
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final SocketListener socketListener, 
-        final InetAddress localServerAddress) throws IOException {
+        final InetSocketAddress addressToRelayTo) throws IOException {
         final CandidateProvider<InetSocketAddress> stunCandidateProvider =
             new DnsSrvCandidateProvider("_stun._udp.littleshoot.org");
         
@@ -274,11 +279,11 @@ public class P2P {
             new MappedTcpAnswererServer(natPmpService, upnpService, 
                 socketListener);
 
-        final InetSocketAddress httpServerAddress =
-            new InetSocketAddress(localServerAddress, ShootConstants.HTTP_PORT);
+        //final InetSocketAddress addressToRelayTo =
+        //    new InetSocketAddress(localServerAddress, relayPort);
         
         final TurnClientListener clientListener =
-            new ServerDataFeeder(httpServerAddress);
+            new ServerDataFeeder(addressToRelayTo);
         
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
             streamDesc, turnCandidateProvider, natPmpService, upnpService,
@@ -288,8 +293,8 @@ public class P2P {
     private static SipClientLauncher newSipClientLauncher(
         final SipClientTracker sipClientTracker, 
         final OfferAnswerFactory offerAnswerFactory, 
-        final SocketListener socketListener, 
-        final SipUriFactory sipUriFactory, final int relayWaitTime) {
+        final SocketListener socketListener, final SipUriFactory sipUriFactory, 
+        final int relayWaitTime) {
         final UriUtils uriUtils = new UriUtilsImpl();
         final CandidateProvider<InetSocketAddress> sipCandidateProvider =
             new DnsSrvCandidateProvider("_sip._tcp2.littleshoot.org");
