@@ -13,10 +13,6 @@
     <url></url>
 
     <dependencies>
-        <dependency>
-            <groupId>org.lastbamboo</groupId>
-            <artifactId>lastbamboo-common-ice-rudp</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.lastbamboo</groupId>
