@@ -20,6 +20,7 @@ import org.lastbamboo.common.offer.answer.OfferAnswerListenerImpl;
 import org.lastbamboo.common.p2p.P2PClient;
 import org.lastbamboo.common.portmapping.NatPmpService;
 import org.lastbamboo.common.portmapping.PortMapListener;
+import org.lastbamboo.common.portmapping.PortMappingProtocol;
 import org.lastbamboo.common.portmapping.UpnpService;
 import org.lastbamboo.common.sip.bootstrap.ProxyRegistrarFactory;
 import org.lastbamboo.common.sip.bootstrap.ProxyRegistrarFactoryImpl;
@@ -348,7 +349,7 @@ public class P2P {
                 final PortMapListener portMapListener) {
             }
             
-            public int addNatPmpMapping(final int protocolType, 
+            public int addNatPmpMapping(final PortMappingProtocol protocolType, 
                 final  int localPort, final int externalPortRequested) {
                 return 0;
             }
@@ -361,7 +362,7 @@ public class P2P {
             public void removeUpnpMapping(final int mappingIndex) {
             }
             
-            public int addUpnpMapping(final int protocolType, 
+            public int addUpnpMapping(final PortMappingProtocol protocolType, 
                 final int localPort, final int externalPortRequested) {
                 return 0;
             }
