@@ -280,9 +280,6 @@ public class P2P {
             new MappedTcpAnswererServer(natPmpService, upnpService, 
                 socketListener);
 
-        //final InetSocketAddress addressToRelayTo =
-        //    new InetSocketAddress(localServerAddress, relayPort);
-        
         final TurnClientListener clientListener =
             new ServerDataFeeder(addressToRelayTo);
         
@@ -345,12 +342,9 @@ public class P2P {
             public void removeNatPmpMapping(final int mappingIndex) {
             }
             
-            public void addPortMapListener(
+            public int addNatPmpMapping(final PortMappingProtocol protocol, 
+                final int localPort, final int externalPortRequested, 
                 final PortMapListener portMapListener) {
-            }
-            
-            public int addNatPmpMapping(final PortMappingProtocol protocolType, 
-                final  int localPort, final int externalPortRequested) {
                 return 0;
             }
         };
@@ -362,13 +356,10 @@ public class P2P {
             public void removeUpnpMapping(final int mappingIndex) {
             }
             
-            public int addUpnpMapping(final PortMappingProtocol protocolType, 
-                final int localPort, final int externalPortRequested) {
-                return 0;
-            }
-            
-            public void addPortMapListener(
+            public int addUpnpMapping(final PortMappingProtocol protocol, 
+                final int localPort, final int externalPortRequested, 
                 final PortMapListener portMapListener) {
+                return 0;
             }
         };
     }

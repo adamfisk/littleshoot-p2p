@@ -50,6 +50,11 @@
             <groupId>org.lastbamboo</groupId>
             <artifactId>lastbamboo-common-xmpp</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-jni-jlibtorrent</artifactId>
+        </dependency>
     </dependencies>
 
     <parent>
