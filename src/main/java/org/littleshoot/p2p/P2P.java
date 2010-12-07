@@ -285,7 +285,7 @@ public class P2P {
         
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
             streamDesc, turnCandidateProvider, natPmpService, upnpService,
-            answererServer, clientListener);
+            answererServer, clientListener, stunCandidateProvider);
     }
 
     private static SipClientLauncher newSipClientLauncher(
