@@ -23,6 +23,11 @@
 
         <dependency>
             <groupId>org.lastbamboo</groupId>
+            <artifactId>lastbamboo-common-ice</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lastbamboo</groupId>
             <artifactId>lastbamboo-common-sip-bootstrap</artifactId>
         </dependency>
 
