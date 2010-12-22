@@ -11,6 +11,7 @@ import org.lastbamboo.common.ice.IceMediaStreamFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactoryImpl;
 import org.lastbamboo.common.ice.IceOfferAnswerFactory;
 import org.lastbamboo.common.ice.MappedTcpAnswererServer;
+import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
 import org.lastbamboo.common.ice.UdtSocketFactory;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
@@ -272,13 +273,17 @@ public class P2P {
         final MappedTcpAnswererServer answererServer =
             new MappedTcpAnswererServer(natPmpService, upnpService, 
                 serverAddress);
+        
+        final MappedTcpOffererServerPool offererServer =
+            new MappedTcpOffererServerPool(natPmpService, upnpService);
 
         final TurnClientListener clientListener =
             new ServerDataFeeder(serverAddress);
         
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
             streamDesc, turnCandidateProvider, natPmpService, upnpService,
-            answererServer, clientListener, stunCandidateProvider);
+            answererServer, clientListener, stunCandidateProvider,
+            offererServer);
     }
 
     private static SipClientLauncher newSipClientLauncher(
