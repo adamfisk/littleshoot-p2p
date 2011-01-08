@@ -3,6 +3,8 @@ package org.littleshoot.p2p;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import javax.net.SocketFactory;
+
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
@@ -118,7 +120,7 @@ public class P2P {
         return newSipP2PClient(streamDesc, protocol, emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
-
+    
     /**
      * Creates a new LittleShoot P2P instance with a custom configuration file
      * and allowing custom classes for NAT PMP and UPnP mappings. 
@@ -134,6 +136,26 @@ public class P2P {
         final IceMediaStreamDesc streamDesc, final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress) throws IOException {
+        return newSipP2PClient(streamDesc, protocol, natPmpService, 
+            upnpService, serverAddress, SocketFactory.getDefault());
+    }
+
+    /**
+     * Creates a new LittleShoot P2P instance with a custom configuration file
+     * and allowing custom classes for NAT PMP and UPnP mappings. 
+     * 
+     * @param streamDesc A configuration class allowing the caller to specify
+     * things like whether or not the use TCP, UDP, and TURN relay connections.
+     * @param natPmpService The NAT PMP implementation.
+     * @param upnpService The UPnP implementation.
+     * @throws IOException If any of the necessary network configurations 
+     * cannot be established.
+     */
+    public static P2PClient newSipP2PClient(
+        final IceMediaStreamDesc streamDesc, final String protocol, 
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final InetSocketAddress serverAddress,
+        final SocketFactory socketFactory) throws IOException {
         log.info("Creating P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -143,7 +165,7 @@ public class P2P {
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
-                socketListener, serverAddress);
+                socketListener, serverAddress, socketFactory);
 
         // Now construct all the SIP classes and link them to HTTP client.
         final SipClientTracker sipClientTracker = new SipClientTrackerImpl();
@@ -155,10 +177,10 @@ public class P2P {
             offerAnswerFactory, socketListener, sipUriFactory, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
-            final ProtocolSocketFactory socketFactory = 
+            final ProtocolSocketFactory sf = 
                 new SipProtocolSocketFactory(client, sipUriFactory);
             final Protocol sipProtocol = 
-                new Protocol(protocol, socketFactory, 80);
+                new Protocol(protocol, sf, 80);
             Protocol.registerProtocol(protocol, sipProtocol);
         }
         return client;
@@ -196,6 +218,15 @@ public class P2P {
             emptyUpnpService(), serverAddress);
     }
     
+    public static XmppP2PClient newXmppP2PClient(
+        final IceMediaStreamDesc streamDesc, final String protocol, 
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final InetSocketAddress serverAddress) 
+        throws IOException {
+        return newXmppP2PClient(streamDesc, protocol, natPmpService,
+            upnpService, serverAddress, SocketFactory.getDefault());
+    }
+    
     /**
      * Creates a new LittleShoot P2P instance with a custom configuration file
      * and allowing custom classes for NAT PMP and UPnP mappings. 
@@ -204,14 +235,17 @@ public class P2P {
      * things like whether or not the use TCP, UDP, and TURN relay connections.
      * @param natPmpService The NAT PMP implementation.
      * @param upnpService The UPnP implementation.
+     * @param socketFactory The factory for creating plain TCP sockets. This
+     * could be an SSL socket factory, for example, to create SSL connections
+     * to peers when connecting over TCP.
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
     public static XmppP2PClient newXmppP2PClient(
         final IceMediaStreamDesc streamDesc, final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
-        final InetSocketAddress serverAddress) 
-        throws IOException {
+        final InetSocketAddress serverAddress,
+        final SocketFactory socketFactory) throws IOException {
         log.info("Creating XMPP P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -221,18 +255,17 @@ public class P2P {
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
-                socketListener, serverAddress);
+                socketListener, serverAddress, socketFactory);
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = newXmppSignalingCLient(
             offerAnswerFactory, socketListener, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
-            final ProtocolSocketFactory socketFactory = 
+            final ProtocolSocketFactory sf = 
                 new XmppProtocolSocketFactory(client, 
                     new DefaultXmppUriFactory());
-            final Protocol sipProtocol = 
-                new Protocol(protocol, socketFactory, 80);
+            final Protocol sipProtocol = new Protocol(protocol, sf, 80);
             Protocol.registerProtocol(protocol, sipProtocol);
         }
         return client;
@@ -259,7 +292,8 @@ public class P2P {
         final IceMediaStreamDesc streamDesc, 
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final SocketListener socketListener, 
-        final InetSocketAddress serverAddress) throws IOException {
+        final InetSocketAddress serverAddress, 
+        final SocketFactory socketFactory) throws IOException {
         final CandidateProvider<InetSocketAddress> stunCandidateProvider =
             new DnsSrvCandidateProvider("_stun._udp.littleshoot.org");
         
@@ -283,7 +317,7 @@ public class P2P {
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
             streamDesc, turnCandidateProvider, natPmpService, upnpService,
             answererServer, clientListener, stunCandidateProvider,
-            offererServer);
+            offererServer, socketFactory);
     }
 
     private static SipClientLauncher newSipClientLauncher(
