@@ -3,6 +3,7 @@ package org.littleshoot.p2p;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -137,7 +138,8 @@ public class P2P {
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress) throws IOException {
         return newSipP2PClient(streamDesc, protocol, natPmpService, 
-            upnpService, serverAddress, SocketFactory.getDefault());
+            upnpService, serverAddress, SocketFactory.getDefault(),
+            ServerSocketFactory.getDefault());
     }
 
     /**
@@ -155,7 +157,8 @@ public class P2P {
         final IceMediaStreamDesc streamDesc, final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
-        final SocketFactory socketFactory) throws IOException {
+        final SocketFactory socketFactory,
+        final ServerSocketFactory serverSocketFactory) throws IOException {
         log.info("Creating P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -165,7 +168,8 @@ public class P2P {
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
-                socketListener, serverAddress, socketFactory);
+                socketListener, serverAddress, socketFactory,
+                serverSocketFactory);
 
         // Now construct all the SIP classes and link them to HTTP client.
         final SipClientTracker sipClientTracker = new SipClientTrackerImpl();
@@ -224,7 +228,8 @@ public class P2P {
         final InetSocketAddress serverAddress) 
         throws IOException {
         return newXmppP2PClient(streamDesc, protocol, natPmpService,
-            upnpService, serverAddress, SocketFactory.getDefault());
+            upnpService, serverAddress, SocketFactory.getDefault(),
+            ServerSocketFactory.getDefault());
     }
     
     /**
@@ -245,7 +250,8 @@ public class P2P {
         final IceMediaStreamDesc streamDesc, final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
-        final SocketFactory socketFactory) throws IOException {
+        final SocketFactory socketFactory,
+        final ServerSocketFactory serverSocketFactory) throws IOException {
         log.info("Creating XMPP P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -255,7 +261,8 @@ public class P2P {
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
-                socketListener, serverAddress, socketFactory);
+                socketListener, serverAddress, socketFactory, 
+                serverSocketFactory);
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = newXmppSignalingCLient(
@@ -293,7 +300,8 @@ public class P2P {
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final SocketListener socketListener, 
         final InetSocketAddress serverAddress, 
-        final SocketFactory socketFactory) throws IOException {
+        final SocketFactory socketFactory, 
+        final ServerSocketFactory serverSocketFactory) throws IOException {
         final CandidateProvider<InetSocketAddress> stunCandidateProvider =
             new DnsSrvCandidateProvider("_stun._udp.littleshoot.org");
         
@@ -309,7 +317,8 @@ public class P2P {
                 serverAddress);
         
         final MappedTcpOffererServerPool offererServer =
-            new MappedTcpOffererServerPool(natPmpService, upnpService);
+            new MappedTcpOffererServerPool(natPmpService, upnpService,
+                serverSocketFactory);
 
         final TurnClientListener clientListener =
             new ServerDataFeeder(serverAddress);
