@@ -229,7 +229,7 @@ public class P2P {
         throws IOException {
         return newXmppP2PClient(streamDesc, protocol, natPmpService,
             upnpService, serverAddress, SocketFactory.getDefault(),
-            ServerSocketFactory.getDefault());
+            ServerSocketFactory.getDefault(), serverAddress);
     }
     
     /**
@@ -251,13 +251,14 @@ public class P2P {
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
-        final ServerSocketFactory serverSocketFactory) throws IOException {
+        final ServerSocketFactory serverSocketFactory,
+        final InetSocketAddress plainTextRelayAddress) throws IOException {
         log.info("Creating XMPP P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
         // relays their data to the local HTTP server.
         final SocketListener socketListener = 
-            new RelayingSocketHandler(serverAddress);
+            new RelayingSocketHandler(plainTextRelayAddress);
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
