@@ -2,6 +2,8 @@ package org.littleshoot.p2p;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Collection;
 
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
@@ -48,6 +50,7 @@ import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayer;
 import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayerImpl;
 import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
+import org.lastbamboo.common.stun.stack.StunConstants;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
 import org.lastbamboo.common.util.CandidateProvider;
@@ -303,8 +306,22 @@ public class P2P {
         final InetSocketAddress serverAddress, 
         final SocketFactory socketFactory, 
         final ServerSocketFactory serverSocketFactory) throws IOException {
+        
+        // We hard-code this instead of looking it up to avoid the DNS
+        // control point.
         final CandidateProvider<InetSocketAddress> stunCandidateProvider =
-            new DnsSrvCandidateProvider("_stun._udp.littleshoot.org");
+            new CandidateProvider<InetSocketAddress>() {
+
+                public Collection<InetSocketAddress> getCandidates() {
+                    return Arrays.asList(StunConstants.SERVERS);
+                }
+
+                public InetSocketAddress getCandidate() {
+                    return getCandidates().iterator().next();
+                }
+            };
+        //final CandidateProvider<InetSocketAddress> stunCandidateProvider =
+        //    new DnsSrvCandidateProvider("_stun._udp.littleshoot.org");
         
         final CandidateProvider<InetSocketAddress> turnCandidateProvider =
             new DnsSrvCandidateProvider("_turn._tcp.littleshoot.org");
