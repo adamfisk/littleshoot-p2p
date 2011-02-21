@@ -10,7 +10,7 @@
     <description>
         Contains the full LittleShoot P2P networking stack.
     </description>
-    <url></url>
+    <url>http://www.littleshoot.org</url>
 
     <dependencies>
 
