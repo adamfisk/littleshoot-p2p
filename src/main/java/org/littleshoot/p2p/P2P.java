@@ -50,7 +50,7 @@ import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayer;
 import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayerImpl;
 import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
-import org.lastbamboo.common.stun.stack.StunConstants;
+import org.littleshoot.stun.stack.StunConstants;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
 import org.littleshoot.util.CandidateProvider;
