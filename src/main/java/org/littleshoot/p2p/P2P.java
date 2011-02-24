@@ -90,7 +90,7 @@ public class P2P {
     public static P2PClient newSipP2PClient(
         final InetSocketAddress serverAddress) throws IOException {
         return newSipP2PClient(new IceMediaStreamDesc(true, true, "message", 
-            "http", 1, true), serverAddress);
+            "http", 1, false), serverAddress);
     }
     
     /**
