@@ -2,6 +2,7 @@ package org.littleshoot.p2p;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -11,6 +12,7 @@ import javax.net.SocketFactory;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
+import org.lastbamboo.common.ice.BarchartUdtSocketFactory;
 import org.lastbamboo.common.ice.IceMediaStreamDesc;
 import org.lastbamboo.common.ice.IceMediaStreamFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactoryImpl;
@@ -18,7 +20,6 @@ import org.lastbamboo.common.ice.IceOfferAnswerFactory;
 import org.lastbamboo.common.ice.MappedTcpAnswererServer;
 import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
-import org.lastbamboo.common.ice.UdtSocketFactory;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
 import org.lastbamboo.common.offer.answer.OfferAnswerListener;
 import org.lastbamboo.common.offer.answer.OfferAnswerListenerImpl;
@@ -50,17 +51,17 @@ import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayer;
 import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayerImpl;
 import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
-import org.littleshoot.stun.stack.StunConstants;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
-import org.littleshoot.util.CandidateProvider;
-import org.littleshoot.util.DnsSrvCandidateProvider;
-import org.littleshoot.util.RelayingSocketHandler;
-import org.littleshoot.util.SocketListener;
 import org.littleshoot.commom.xmpp.DefaultXmppP2PClient;
 import org.littleshoot.commom.xmpp.DefaultXmppUriFactory;
 import org.littleshoot.commom.xmpp.XmppP2PClient;
 import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
+import org.littleshoot.stun.stack.StunConstants;
+import org.littleshoot.util.CandidateProvider;
+import org.littleshoot.util.DnsSrvCandidateProvider;
+import org.littleshoot.util.RelayingSocketHandler;
+import org.littleshoot.util.SocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,6 +194,25 @@ public class P2P {
         return client;
     }
     
+    public static XmppP2PClient newXmppP2PUdpClient(
+        final InetSocketAddress serverAddress) throws IOException {
+        final IceMediaStreamDesc streamDesc = 
+            IceMediaStreamDesc.newUnreliableUdpStream();
+        
+        // This listener listens for sockets the server side of P2P and 
+        // relays their data to the local HTTP server.
+        final SocketListener socketListener = 
+            new SocketListener() {
+                public void onSocket(final Socket sock) throws IOException {
+                    log.info("Got UDP socket!!");
+                }
+            };
+        
+        return newXmppP2PHttpClient(streamDesc, "shoot", emptyNatPmpService(), 
+            emptyUpnpService(), serverAddress, SocketFactory.getDefault(),
+            ServerSocketFactory.getDefault(),socketListener);
+    }
+    
     /**
      * Creates a new LittleShoot P2P instance with a custom configuration file
      * and allowing custom classes for NAT PMP and UPnP mappings. 
@@ -202,10 +222,10 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static XmppP2PClient newXmppP2PClient(
+    public static XmppP2PClient newXmppP2PHttpClient(
         final IceMediaStreamDesc streamDesc, 
         final InetSocketAddress serverAddress) throws IOException {
-        return newXmppP2PClient(streamDesc, "shoot", emptyNatPmpService(), 
+        return newXmppP2PHttpClient(streamDesc, "shoot", emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
     
@@ -218,19 +238,19 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PClient newXmppP2PClient(
+    public static P2PClient newXmppP2PHttpClient(
         final IceMediaStreamDesc streamDesc, final String protocol,
         final InetSocketAddress serverAddress) throws IOException {
-        return newXmppP2PClient(streamDesc, protocol, emptyNatPmpService(), 
+        return newXmppP2PHttpClient(streamDesc, protocol, emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
     
-    public static XmppP2PClient newXmppP2PClient(
+    public static XmppP2PClient newXmppP2PHttpClient(
         final IceMediaStreamDesc streamDesc, final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress) 
         throws IOException {
-        return newXmppP2PClient(streamDesc, protocol, natPmpService,
+        return newXmppP2PHttpClient(streamDesc, protocol, natPmpService,
             upnpService, serverAddress, SocketFactory.getDefault(),
             ServerSocketFactory.getDefault(), serverAddress);
     }
@@ -249,7 +269,7 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static XmppP2PClient newXmppP2PClient(
+    public static XmppP2PClient newXmppP2PHttpClient(
         final IceMediaStreamDesc streamDesc, final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
@@ -262,6 +282,34 @@ public class P2P {
         // relays their data to the local HTTP server.
         final SocketListener socketListener = 
             new RelayingSocketHandler(plainTextRelayAddress);
+        
+        return newXmppP2PHttpClient(streamDesc, protocol, natPmpService, 
+            upnpService, serverAddress, socketFactory, serverSocketFactory, 
+            socketListener);
+    }
+    
+    /**
+     * Creates a new LittleShoot P2P instance with a custom configuration file
+     * and allowing custom classes for NAT PMP and UPnP mappings. 
+     * 
+     * @param streamDesc A configuration class allowing the caller to specify
+     * things like whether or not the use TCP, UDP, and TURN relay connections.
+     * @param natPmpService The NAT PMP implementation.
+     * @param upnpService The UPnP implementation.
+     * @param socketFactory The factory for creating plain TCP sockets. This
+     * could be an SSL socket factory, for example, to create SSL connections
+     * to peers when connecting over TCP.
+     * @throws IOException If any of the necessary network configurations 
+     * cannot be established.
+     */
+    public static XmppP2PClient newXmppP2PHttpClient(
+        final IceMediaStreamDesc streamDesc, final String protocol, 
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final InetSocketAddress serverAddress,
+        final SocketFactory socketFactory,
+        final ServerSocketFactory serverSocketFactory,
+        final SocketListener socketListener) throws IOException {
+        log.info("Creating XMPP P2P instance");
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
@@ -295,8 +343,10 @@ public class P2P {
         final OfferAnswerListener offerAnswerListener = 
             new OfferAnswerListenerImpl(socketListener);
         
-        return new DefaultXmppP2PClient(offerAnswerFactory,
+        return DefaultXmppP2PClient.newGoogleTalkClient(offerAnswerFactory,
             offerAnswerListener, relayWaitTime);
+        //return new DefaultXmppP2PClient(offerAnswerFactory,
+        //    offerAnswerListener, relayWaitTime);
     }
     
     private static OfferAnswerFactory newIceOfferAnswerFactory(
@@ -328,7 +378,9 @@ public class P2P {
     
         final IceMediaStreamFactory mediaStreamFactory = 
             new IceMediaStreamFactoryImpl(streamDesc, stunCandidateProvider);
-        final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
+        //final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
+        final UdpSocketFactory udpSocketFactory = 
+            new BarchartUdtSocketFactory();
         
         final MappedTcpAnswererServer answererServer =
             new MappedTcpAnswererServer(natPmpService, upnpService, 
