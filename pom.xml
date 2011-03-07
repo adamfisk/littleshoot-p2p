@@ -26,9 +26,9 @@
     </licenses>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>6</version>
+        <groupId>org.littleshoot</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
     <scm>
@@ -55,6 +55,12 @@
             <groupId>com.barchart.udt</groupId>
             <artifactId>barchart-udt4-bundle</artifactId>
             <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
         </dependency>
 
         <dependency>

@@ -12,13 +12,13 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
 import org.lastbamboo.common.ice.BarchartUdtSocketFactory;
-import org.lastbamboo.common.ice.IceMediaStreamDesc;
 import org.lastbamboo.common.ice.IceMediaStreamFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactoryImpl;
 import org.lastbamboo.common.ice.IceOfferAnswerFactory;
 import org.lastbamboo.common.ice.MappedTcpAnswererServer;
 import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
+import org.lastbamboo.common.offer.answer.IceMediaStreamDesc;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
 import org.lastbamboo.common.p2p.P2PClient;
 import org.lastbamboo.common.portmapping.NatPmpService;
@@ -90,14 +90,7 @@ public class P2P {
      */
     public static P2PClient newSipP2PHttpClient(
         final InetSocketAddress serverAddress) throws IOException {
-        return newSipP2PClient(new IceMediaStreamDesc(true, true, "message", 
-            "http", 1, false), serverAddress);
-    }
-    
-    public static P2PClient newSipP2PRawUdpClient(
-        final InetSocketAddress serverAddress) throws IOException {
-        return newSipP2PClient(IceMediaStreamDesc.newUnreliableUdpStream(), 
-            serverAddress);
+        return newSipP2PClient(serverAddress);
     }
     
     /**
@@ -114,9 +107,8 @@ public class P2P {
      * cannot be established.
      */
     public static P2PClient newSipP2PClient(
-        final IceMediaStreamDesc streamDesc, 
         final InetSocketAddress serverAddress) throws IOException {
-        return newSipP2PClient(streamDesc, "shoot", emptyNatPmpService(), 
+        return newSipP2PClient("shoot", emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
     
@@ -130,10 +122,9 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PClient newSipP2PClient(
-        final IceMediaStreamDesc streamDesc, final String protocol,
+    public static P2PClient newSipP2PClient(final String protocol,
         final InetSocketAddress serverAddress) throws IOException {
-        return newSipP2PClient(streamDesc, protocol, emptyNatPmpService(), 
+        return newSipP2PClient(protocol, emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
     
@@ -148,11 +139,10 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PClient newSipP2PClient(
-        final IceMediaStreamDesc streamDesc, final String protocol, 
+    public static P2PClient newSipP2PClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress) throws IOException {
-        return newSipP2PClient(streamDesc, protocol, natPmpService, 
+        return newSipP2PClient(protocol, natPmpService, 
             upnpService, serverAddress, SocketFactory.getDefault(),
             ServerSocketFactory.getDefault());
     }
@@ -168,8 +158,7 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PClient newSipP2PClient(
-        final IceMediaStreamDesc streamDesc, final String protocol, 
+    public static P2PClient newSipP2PClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
@@ -182,7 +171,7 @@ public class P2P {
             new RelayingSocketHandler(serverAddress);
         
         final OfferAnswerFactory offerAnswerFactory = 
-            newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
+            newIceOfferAnswerFactory(natPmpService, upnpService,
                 serverAddress, socketFactory,
                 serverSocketFactory);
 
@@ -215,7 +204,7 @@ public class P2P {
         final SessionSocketListener socketListener = 
             new DefaultRawUdpServerDepot();
         
-        return newXmppP2PHttpClient(streamDesc, "shoot", emptyNatPmpService(), 
+        return newXmppP2PHttpClient("shoot", emptyNatPmpService(), 
             emptyUpnpService(), serverAddress, SocketFactory.getDefault(),
             ServerSocketFactory.getDefault(), socketListener);
     }
@@ -230,9 +219,8 @@ public class P2P {
      * cannot be established.
      */
     public static XmppP2PClient newXmppP2PHttpClient(
-        final IceMediaStreamDesc streamDesc, 
         final InetSocketAddress serverAddress) throws IOException {
-        return newXmppP2PHttpClient(streamDesc, "shoot", emptyNatPmpService(), 
+        return newXmppP2PHttpClient("shoot", emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
     
@@ -245,19 +233,18 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static P2PClient newXmppP2PHttpClient(
-        final IceMediaStreamDesc streamDesc, final String protocol,
+    public static P2PClient newXmppP2PHttpClient(final String protocol,
         final InetSocketAddress serverAddress) throws IOException {
-        return newXmppP2PHttpClient(streamDesc, protocol, emptyNatPmpService(), 
+        return newXmppP2PHttpClient(protocol, emptyNatPmpService(), 
             emptyUpnpService(), serverAddress);
     }
     
     public static XmppP2PClient newXmppP2PHttpClient(
-        final IceMediaStreamDesc streamDesc, final String protocol, 
+        final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress) 
         throws IOException {
-        return newXmppP2PHttpClient(streamDesc, protocol, natPmpService,
+        return newXmppP2PHttpClient(protocol, natPmpService,
             upnpService, serverAddress, SocketFactory.getDefault(),
             ServerSocketFactory.getDefault(), serverAddress);
     }
@@ -276,8 +263,7 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static XmppP2PClient newXmppP2PHttpClient(
-        final IceMediaStreamDesc streamDesc, final String protocol, 
+    public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
@@ -290,7 +276,7 @@ public class P2P {
         final SessionSocketListener socketListener = 
             new RelayingSocketHandler(plainTextRelayAddress);
         
-        return newXmppP2PHttpClient(streamDesc, protocol, natPmpService, 
+        return newXmppP2PHttpClient(protocol, natPmpService, 
             upnpService, serverAddress, socketFactory, serverSocketFactory, 
             socketListener);
     }
@@ -309,8 +295,7 @@ public class P2P {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static XmppP2PClient newXmppP2PHttpClient(
-        final IceMediaStreamDesc streamDesc, final String protocol, 
+    public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
@@ -319,7 +304,7 @@ public class P2P {
         log.info("Creating XMPP P2P instance");
         
         final OfferAnswerFactory offerAnswerFactory = 
-            newIceOfferAnswerFactory(streamDesc, natPmpService, upnpService,
+            newIceOfferAnswerFactory(natPmpService, upnpService,
                 serverAddress, socketFactory, serverSocketFactory);
 
         // Now construct all the XMPP classes and link them to HTTP client.
@@ -361,7 +346,6 @@ public class P2P {
     }
     
     private static OfferAnswerFactory newIceOfferAnswerFactory(
-        final IceMediaStreamDesc streamDesc, 
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final InetSocketAddress serverAddress, 
         final SocketFactory socketFactory, 
@@ -387,7 +371,7 @@ public class P2P {
             new DnsSrvCandidateProvider("_turn._tcp.littleshoot.org");
     
         final IceMediaStreamFactory mediaStreamFactory = 
-            new IceMediaStreamFactoryImpl(streamDesc, stunCandidateProvider);
+            new IceMediaStreamFactoryImpl(stunCandidateProvider);
         //final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
         final UdpSocketFactory udpSocketFactory = 
             new BarchartUdtSocketFactory();
@@ -404,7 +388,7 @@ public class P2P {
             new ServerDataFeeder(serverAddress);
         
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
-            streamDesc, turnCandidateProvider, natPmpService, upnpService,
+            turnCandidateProvider, natPmpService, upnpService,
             answererServer, clientListener, stunCandidateProvider,
             offererServer, socketFactory);
     }
