@@ -18,7 +18,6 @@ import org.lastbamboo.common.ice.IceOfferAnswerFactory;
 import org.lastbamboo.common.ice.MappedTcpAnswererServer;
 import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
-import org.lastbamboo.common.offer.answer.IceMediaStreamDesc;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
 import org.lastbamboo.common.p2p.P2PClient;
 import org.lastbamboo.common.portmapping.NatPmpService;
@@ -192,21 +191,6 @@ public class P2P {
             Protocol.registerProtocol(protocol, sipProtocol);
         }
         return client;
-    }
-    
-    public static XmppP2PClient newXmppP2PUdpClient(
-        final InetSocketAddress serverAddress) throws IOException {
-        final IceMediaStreamDesc streamDesc = 
-            IceMediaStreamDesc.newUnreliableUdpStream();
-        
-        // This listener listens for sockets the server side of P2P and 
-        // relays their data to the local HTTP server.
-        final SessionSocketListener socketListener = 
-            new DefaultRawUdpServerDepot();
-        
-        return newXmppP2PHttpClient("shoot", emptyNatPmpService(), 
-            emptyUpnpService(), serverAddress, SocketFactory.getDefault(),
-            ServerSocketFactory.getDefault(), socketListener);
     }
     
     /**
