@@ -34,7 +34,6 @@ import org.lastbamboo.common.sip.client.SipClientTrackerImpl;
 import org.lastbamboo.common.sip.httpclient.SipProtocolSocketFactory;
 import org.lastbamboo.common.sip.stack.IdleSipSessionListener;
 import org.lastbamboo.common.sip.stack.SipUriFactory;
-import org.lastbamboo.common.sip.stack.SipUriFactoryImpl;
 import org.lastbamboo.common.sip.stack.message.SipMessageFactory;
 import org.lastbamboo.common.sip.stack.message.SipMessageFactoryImpl;
 import org.lastbamboo.common.sip.stack.message.header.SipHeaderFactory;
@@ -176,16 +175,15 @@ public class P2P {
 
         // Now construct all the SIP classes and link them to HTTP client.
         final SipClientTracker sipClientTracker = new SipClientTrackerImpl();
-        final SipUriFactory sipUriFactory = new SipUriFactoryImpl();
         
         // Note the last argument for how long to wait before using a relay
         // is in seconds!!
         final P2PClient client = newSipClientLauncher(sipClientTracker,
-            offerAnswerFactory, socketListener, sipUriFactory, 20);
+            offerAnswerFactory, socketListener, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
-                new SipProtocolSocketFactory(client, sipUriFactory);
+                new SipProtocolSocketFactory(client);
             final Protocol sipProtocol = 
                 new Protocol(protocol, sf, 80);
             Protocol.registerProtocol(protocol, sipProtocol);
@@ -380,8 +378,7 @@ public class P2P {
     private static SipClientLauncher newSipClientLauncher(
         final SipClientTracker sipClientTracker, 
         final OfferAnswerFactory offerAnswerFactory, 
-        final SessionSocketListener socketListener, 
-        final SipUriFactory sipUriFactory, final int relayWaitTime) {
+        final SessionSocketListener socketListener, final int relayWaitTime) {
         final UriUtils uriUtils = new UriUtilsImpl();
         final CandidateProvider<InetSocketAddress> sipCandidateProvider =
             new DnsSrvCandidateProvider("_sip._tcp2.littleshoot.org");
@@ -422,7 +419,7 @@ public class P2P {
                 registrarFactory);
         
         return new SipClientLauncher(sipClientTracker, robustRegistrarFactory, 
-            sipUriFactory, offerAnswerFactory, relayWaitTime);
+            offerAnswerFactory, relayWaitTime);
     }
     
     private static NatPmpService emptyNatPmpService() {
