@@ -2,6 +2,7 @@ package org.littleshoot.p2p;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -33,7 +34,6 @@ import org.lastbamboo.common.sip.client.SipClientTracker;
 import org.lastbamboo.common.sip.client.SipClientTrackerImpl;
 import org.lastbamboo.common.sip.httpclient.SipProtocolSocketFactory;
 import org.lastbamboo.common.sip.stack.IdleSipSessionListener;
-import org.lastbamboo.common.sip.stack.SipUriFactory;
 import org.lastbamboo.common.sip.stack.message.SipMessageFactory;
 import org.lastbamboo.common.sip.stack.message.SipMessageFactoryImpl;
 import org.lastbamboo.common.sip.stack.message.header.SipHeaderFactory;
@@ -87,8 +87,9 @@ public class P2P {
      * cannot be established.
      */
     public static P2PClient newSipP2PHttpClient(
-        final InetSocketAddress serverAddress) throws IOException {
-        return newSipP2PClient(serverAddress);
+        final InetSocketAddress serverAddress,
+        final SessionSocketListener callSocketListener) throws IOException {
+        return newSipP2PClient(serverAddress, callSocketListener);
     }
     
     /**
@@ -105,9 +106,10 @@ public class P2P {
      * cannot be established.
      */
     public static P2PClient newSipP2PClient(
-        final InetSocketAddress serverAddress) throws IOException {
+        final InetSocketAddress serverAddress,
+        final SessionSocketListener callSocketListener) throws IOException {
         return newSipP2PClient("shoot", emptyNatPmpService(), 
-            emptyUpnpService(), serverAddress);
+            emptyUpnpService(), serverAddress, callSocketListener);
     }
     
     /**
@@ -121,9 +123,10 @@ public class P2P {
      * cannot be established.
      */
     public static P2PClient newSipP2PClient(final String protocol,
-        final InetSocketAddress serverAddress) throws IOException {
+        final InetSocketAddress serverAddress,
+        final SessionSocketListener callSocketListener) throws IOException {
         return newSipP2PClient(protocol, emptyNatPmpService(), 
-            emptyUpnpService(), serverAddress);
+            emptyUpnpService(), serverAddress, callSocketListener);
     }
     
     /**
@@ -139,10 +142,11 @@ public class P2P {
      */
     public static P2PClient newSipP2PClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
-        final InetSocketAddress serverAddress) throws IOException {
+        final InetSocketAddress serverAddress,
+        final SessionSocketListener callSocketListener) throws IOException {
         return newSipP2PClient(protocol, natPmpService, 
             upnpService, serverAddress, SocketFactory.getDefault(),
-            ServerSocketFactory.getDefault());
+            ServerSocketFactory.getDefault(), callSocketListener);
     }
 
     /**
@@ -160,7 +164,8 @@ public class P2P {
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
-        final ServerSocketFactory serverSocketFactory) throws IOException {
+        final ServerSocketFactory serverSocketFactory,
+        final SessionSocketListener callSocketListener) throws IOException {
         log.info("Creating P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -179,7 +184,7 @@ public class P2P {
         // Note the last argument for how long to wait before using a relay
         // is in seconds!!
         final P2PClient client = newSipClientLauncher(sipClientTracker,
-            offerAnswerFactory, socketListener, 20);
+            offerAnswerFactory, socketListener, callSocketListener, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
@@ -260,7 +265,11 @@ public class P2P {
         
         return newXmppP2PHttpClient(protocol, natPmpService, 
             upnpService, serverAddress, socketFactory, serverSocketFactory, 
-            socketListener);
+            socketListener, new SessionSocketListener() {
+                
+                public void onSocket(String id, Socket sock) throws IOException {
+                }
+            });
     }
     
     /**
@@ -282,7 +291,8 @@ public class P2P {
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
-        final SessionSocketListener socketListener) throws IOException {
+        final SessionSocketListener socketListener,
+        final SessionSocketListener callSocketListener) throws IOException {
         log.info("Creating XMPP P2P instance");
         
         final OfferAnswerFactory offerAnswerFactory = 
@@ -291,7 +301,7 @@ public class P2P {
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = newXmppSignalingCLient(
-            offerAnswerFactory, socketListener, 20);
+            offerAnswerFactory, socketListener, callSocketListener, 20);
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
@@ -305,7 +315,9 @@ public class P2P {
     
     private static XmppP2PClient newXmppSignalingCLient(
         final OfferAnswerFactory offerAnswerFactory, 
-        final SessionSocketListener socketListener, final int relayWaitTime) {
+        final SessionSocketListener socketListener, 
+        final SessionSocketListener callSocketListener, 
+        final int relayWaitTime) {
         // So there are really two classes that send relay ICE-negotiated 
         // sockets to the HTTP server. The first is the "mapped" server above
         // that accepts *incoming* sockets from the controlling offerer and
@@ -322,7 +334,7 @@ public class P2P {
         //    new AnswererOfferAnswerListener("", socketListener);
         
         return DefaultXmppP2PClient.newGoogleTalkClient(offerAnswerFactory,
-            socketListener, relayWaitTime);
+            socketListener, callSocketListener, relayWaitTime);
         //return new DefaultXmppP2PClient(offerAnswerFactory,
         //    offerAnswerListener, relayWaitTime);
     }
@@ -378,7 +390,9 @@ public class P2P {
     private static SipClientLauncher newSipClientLauncher(
         final SipClientTracker sipClientTracker, 
         final OfferAnswerFactory offerAnswerFactory, 
-        final SessionSocketListener socketListener, final int relayWaitTime) {
+        final SessionSocketListener socketListener, 
+        final SessionSocketListener callSocketListener,
+        final int relayWaitTime) {
         final UriUtils uriUtils = new UriUtilsImpl();
         final CandidateProvider<InetSocketAddress> sipCandidateProvider =
             new DnsSrvCandidateProvider("_sip._tcp2.littleshoot.org");
@@ -412,7 +426,8 @@ public class P2P {
         final ProxyRegistrarFactory registrarFactory =
             new ProxyRegistrarFactoryImpl(messageFactory, transportLayer, 
                 transactionTracker, sipClientTracker, uriUtils, 
-                offerAnswerFactory, socketListener, idleSipSessionListener);
+                offerAnswerFactory, socketListener, callSocketListener,
+                idleSipSessionListener);
         
         final RobustProxyRegistrarFactory robustRegistrarFactory = 
             new RobustProxyRegistrarFactoryImpl(uriUtils, sipCandidateProvider, 
