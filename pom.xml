@@ -101,6 +101,12 @@
 
         <dependency>
             <groupId>org.littleshoot</groupId>
+            <artifactId>udt</artifactId>
+            <version>${ls.version}</version>
+        </dependency> 
+
+        <dependency>
+            <groupId>org.littleshoot</groupId>
             <artifactId>util</artifactId>
             <version>${ls.version}</version>
         </dependency> 

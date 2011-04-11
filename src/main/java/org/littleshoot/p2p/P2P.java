@@ -12,13 +12,13 @@ import javax.net.SocketFactory;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
-import org.lastbamboo.common.ice.BarchartUdtSocketFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactoryImpl;
 import org.lastbamboo.common.ice.IceOfferAnswerFactory;
 import org.lastbamboo.common.ice.MappedTcpAnswererServer;
 import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
+import org.lastbamboo.common.ice.UdtSocketFactory;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
 import org.lastbamboo.common.p2p.P2PClient;
 import org.lastbamboo.common.portmapping.NatPmpService;
@@ -366,9 +366,9 @@ public class P2P {
     
         final IceMediaStreamFactory mediaStreamFactory = 
             new IceMediaStreamFactoryImpl(stunCandidateProvider);
-        //final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
-        final UdpSocketFactory udpSocketFactory = 
-            new BarchartUdtSocketFactory();
+        final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
+        //final UdpSocketFactory udpSocketFactory = 
+        //    new BarchartUdtSocketFactory();
         
         final MappedTcpAnswererServer answererServer =
             new MappedTcpAnswererServer(natPmpService, upnpService, 
