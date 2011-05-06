@@ -55,7 +55,6 @@ import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
 import org.littleshoot.stun.stack.StunConstants;
 import org.littleshoot.util.CandidateProvider;
 import org.littleshoot.util.DnsSrvCandidateProvider;
-import org.littleshoot.util.RelayingSocketHandler;
 import org.littleshoot.util.SessionSocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
