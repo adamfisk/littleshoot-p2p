@@ -48,6 +48,7 @@ import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
+import org.littleshoot.commom.xmpp.ControlXmppP2PClient;
 import org.littleshoot.commom.xmpp.DefaultXmppP2PClient;
 import org.littleshoot.commom.xmpp.DefaultXmppUriFactory;
 import org.littleshoot.commom.xmpp.XmppP2PClient;
@@ -332,7 +333,7 @@ public class P2P {
         //final OfferAnswerListener offerAnswerListener = 
         //    new AnswererOfferAnswerListener("", socketListener);
         
-        return DefaultXmppP2PClient.newGoogleTalkClient(offerAnswerFactory,
+        return ControlXmppP2PClient.newGoogleTalkClient(offerAnswerFactory,
             plainTextRelayAddress, callSocketListener, relayWaitTime);
         //return new DefaultXmppP2PClient(offerAnswerFactory,
         //    offerAnswerListener, relayWaitTime);
