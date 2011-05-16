@@ -7,24 +7,6 @@
     <name>LittleShoot P2P Stack</name>
     <url>http://www.littleshoot.org</url>
 
-    <organization>
-        <name>LittleShoot</name>
-        <url>http://www.littleshoot.org</url>
-    </organization>
-
-    <properties>
-         <slf4j.version>1.6.1</slf4j.version>
-         <ls.version>1.0-SNAPSHOT</ls.version>
-    </properties>
-
-    <licenses>
-        <license>
-            <name>GNU General Public License Version 2</name> 
-            <url>http://www.gnu.org/licenses/gpl.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <parent>
         <groupId>org.littleshoot</groupId>
         <artifactId>parent</artifactId>
@@ -36,18 +18,6 @@
         <developerConnection>scm:git:https://adamfisk@github.com/adamfisk/littleshoot-p2p.git</developerConnection>
         <url>https://adamfisk@github.com/adamfisk/littleshoot-p2p.git</url>
     </scm>
-
-    <developers>
-        <developer>
-            <id>adamfisk</id>
-            <name>Adam Fisk</name>
-            <email>a@littleshoot.org</email>
-            <organization>LittleShoot</organization>
-            <organizationUrl>http://www.littleshoot.org/</organizationUrl>
-            <roles><role>Developer</role></roles>
-            <timezone>-5</timezone>
-        </developer>
-    </developers>
 
     <dependencies>
 
@@ -65,14 +35,14 @@
 
         <dependency>
             <groupId>org.littleshoot</groupId>
-            <artifactId>ice</artifactId>
-            <version>${ls.version}</version>
+            <artifactId>littleshoot-ice</artifactId>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>jlibtorrent</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
@@ -84,118 +54,39 @@
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>sip-bootstrap</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>sip-http-client</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>turn-client</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>udt</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>util</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>xmpp</artifactId>
-            <version>${ls.version}</version>
+            <version>${project.version}</version>
         </dependency> 
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
 
     </dependencies>
 
-    <prerequisites>
-        <maven>2.2.1</maven>
-    </prerequisites>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-
-        <repository>
-            <id>sonatype-nexus-releases</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
