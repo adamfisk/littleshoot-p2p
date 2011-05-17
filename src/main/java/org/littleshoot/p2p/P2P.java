@@ -49,7 +49,6 @@ import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
 import org.littleshoot.commom.xmpp.ControlXmppP2PClient;
-import org.littleshoot.commom.xmpp.DefaultXmppP2PClient;
 import org.littleshoot.commom.xmpp.DefaultXmppUriFactory;
 import org.littleshoot.commom.xmpp.XmppP2PClient;
 import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
