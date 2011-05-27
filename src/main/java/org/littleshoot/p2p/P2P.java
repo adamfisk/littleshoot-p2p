@@ -69,6 +69,12 @@ public class P2P {
      */
     private final static Logger log = LoggerFactory.getLogger(P2P.class);
     
+    /**
+     * Note that in cases where we're not using a relay, this is relay just
+     * the time to wait for the P2P socket to resolve, in seconds.
+     */
+    private static final int DEFAULT_RELAY_WAIT_TIME = 30;
+    
     static {
         // Use Google Public DNS.
         System.setProperty("sun.net.spi.nameservice.nameservers", 
@@ -300,7 +306,8 @@ public class P2P {
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = newXmppSignalingCLient(
-            offerAnswerFactory, plainTextRelayAddress, callSocketListener, 20);
+            offerAnswerFactory, plainTextRelayAddress, callSocketListener, 
+            DEFAULT_RELAY_WAIT_TIME);
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
@@ -332,7 +339,7 @@ public class P2P {
         //final OfferAnswerListener offerAnswerListener = 
         //    new AnswererOfferAnswerListener("", socketListener);
         
-        return ControlXmppP2PClient.newGoogleTalkClient(offerAnswerFactory,
+        return ControlXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
             plainTextRelayAddress, callSocketListener, relayWaitTime);
         //return new DefaultXmppP2PClient(offerAnswerFactory,
         //    offerAnswerListener, relayWaitTime);
