@@ -54,10 +54,13 @@ import org.littleshoot.commom.xmpp.XmppP2PClient;
 import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
 import org.littleshoot.stun.stack.StunConstants;
 import org.littleshoot.util.CandidateProvider;
+import org.littleshoot.util.CommonUtils;
 import org.littleshoot.util.DnsSrvCandidateProvider;
 import org.littleshoot.util.SessionSocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.barchart.udt.ResourceUDT;
 
 /**
  * Class that builds all the elements of the LittleShoot P2P platform.
@@ -79,6 +82,12 @@ public class P2P {
         // Use Google Public DNS.
         System.setProperty("sun.net.spi.nameservice.nameservers", 
             "8.8.8.8,8.8.4.4");
+        
+        // We need to set the System property for Barchart UDT to extract
+        // its libraries to a place where we always have permission to write 
+        // to.
+        System.setProperty(ResourceUDT.PROPERTY_LIBRARY_EXTRACT_LOCATION, 
+            CommonUtils.getLittleShootDir().getAbsolutePath());
     }
     
     /**
