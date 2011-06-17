@@ -48,7 +48,6 @@
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>mina-port</artifactId>
-            <version>${mina.port.version}</version>
         </dependency>
 
         <dependency>
