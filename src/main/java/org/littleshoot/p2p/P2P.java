@@ -414,9 +414,8 @@ public class P2P {
             new ServerDataFeeder(serverAddress);
         
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
-            turnCandidateProvider, natPmpService, upnpService,
-            answererServer, clientListener, stunCandidateProvider,
-            offererServer, socketFactory);
+            turnCandidateProvider, answererServer, clientListener, 
+            stunCandidateProvider, offererServer, socketFactory);
     }
 
     private static SipClientLauncher newSipClientLauncher(
