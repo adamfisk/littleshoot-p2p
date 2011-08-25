@@ -47,6 +47,7 @@ import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayer;
 import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayerImpl;
 import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
+import org.lastbamboo.common.stun.client.PublicIpAddress;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
 import org.littleshoot.commom.xmpp.ControlXmppP2PClient;
@@ -320,7 +321,7 @@ public class P2P {
         final XmppP2PClient client = 
             ControlXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
-                DEFAULT_RELAY_WAIT_TIME);
+                DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress());
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
