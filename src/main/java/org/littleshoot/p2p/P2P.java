@@ -317,9 +317,10 @@ public class P2P {
                 serverAddress, socketFactory, serverSocketFactory, useRelay);
 
         // Now construct all the XMPP classes and link them to HTTP client.
-        final XmppP2PClient client = newXmppSignalingCLient(
-            offerAnswerFactory, plainTextRelayAddress, callSocketListener, 
-            DEFAULT_RELAY_WAIT_TIME);
+        final XmppP2PClient client = 
+            ControlXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
+                plainTextRelayAddress, callSocketListener, 
+                DEFAULT_RELAY_WAIT_TIME);
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
@@ -329,32 +330,6 @@ public class P2P {
             Protocol.registerProtocol(protocol, sipProtocol);
         }
         return client;
-    }
-    
-    private static XmppP2PClient newXmppSignalingCLient(
-        final OfferAnswerFactory offerAnswerFactory, 
-        final InetSocketAddress plainTextRelayAddress, 
-        final SessionSocketListener callSocketListener, 
-        final int relayWaitTime) {
-        // So there are really two classes that send relay ICE-negotiated 
-        // sockets to the HTTP server. The first is the "mapped" server above
-        // that accepts *incoming* sockets from the controlling offerer and
-        // forwards them. The second is created here that handles outgoing
-        // sockets created from the answerer to the offerer. They both do more
-        // or less the same thing, but one works for incoming, the other for
-        // outgoing.
-        
-        // Note that creating the following class is only necessary in the
-        // XMPP case as of this writing -- in SIP these are created internally
-        // when we get incoming SIP INVITEs so we know who incoming "calls"
-        // are from.
-        //final OfferAnswerListener offerAnswerListener = 
-        //    new AnswererOfferAnswerListener("", socketListener);
-        
-        return ControlXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
-            plainTextRelayAddress, callSocketListener, relayWaitTime);
-        //return new DefaultXmppP2PClient(offerAnswerFactory,
-        //    offerAnswerListener, relayWaitTime);
     }
     
     private static OfferAnswerFactory newIceOfferAnswerFactory(
