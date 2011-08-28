@@ -321,7 +321,8 @@ public class P2P {
         final XmppP2PClient client = 
             ControlXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
-                DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress());
+                DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
+                socketFactory);
         
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
