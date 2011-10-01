@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import javax.net.ServerSocketFactory;
@@ -48,6 +47,7 @@ import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayerImpl;
 import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
 import org.lastbamboo.common.stun.client.PublicIpAddress;
+import org.lastbamboo.common.stun.client.StunServerRepository;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
 import org.littleshoot.commom.xmpp.ControlXmppP2PClient;
@@ -347,7 +347,7 @@ public class P2P {
             new CandidateProvider<InetSocketAddress>() {
 
                 public Collection<InetSocketAddress> getCandidates() {
-                    return Arrays.asList(StunConstants.SERVERS);
+                    return StunServerRepository.getServers();
                 }
 
                 public InetSocketAddress getCandidate() {
