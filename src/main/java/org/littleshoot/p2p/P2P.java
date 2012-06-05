@@ -54,7 +54,6 @@ import org.littleshoot.commom.xmpp.ControlXmppP2PClient;
 import org.littleshoot.commom.xmpp.DefaultXmppUriFactory;
 import org.littleshoot.commom.xmpp.XmppP2PClient;
 import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
-import org.littleshoot.stun.stack.StunConstants;
 import org.littleshoot.util.CandidateProvider;
 import org.littleshoot.util.CommonUtils;
 import org.littleshoot.util.DnsSrvCandidateProvider;
