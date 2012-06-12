@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.net.ServerSocketFactory;
-import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -160,7 +160,8 @@ public class P2P {
         final InetSocketAddress serverAddress,
         final SessionSocketListener callSocketListener) throws IOException {
         return newSipP2PClient(protocol, natPmpService, 
-            upnpService, serverAddress, SocketFactory.getDefault(),
+            upnpService, serverAddress, 
+            (SSLSocketFactory) SSLSocketFactory.getDefault(),
             ServerSocketFactory.getDefault(), callSocketListener);
     }
 
@@ -178,7 +179,7 @@ public class P2P {
     public static P2PClient newSipP2PClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
-        final SocketFactory socketFactory,
+        final SSLSocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
         final SessionSocketListener callSocketListener) throws IOException {
         log.info("Creating P2P instance");
@@ -247,7 +248,7 @@ public class P2P {
         final InetSocketAddress serverAddress) 
         throws IOException {
         return newXmppP2PHttpClient(protocol, natPmpService,
-            upnpService, serverAddress, SocketFactory.getDefault(),
+            upnpService, serverAddress, (SSLSocketFactory) SSLSocketFactory.getDefault(),
             ServerSocketFactory.getDefault(), serverAddress, true);
     }
     
@@ -268,7 +269,7 @@ public class P2P {
     public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
-        final SocketFactory socketFactory,
+        final SSLSocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
         final InetSocketAddress plainTextRelayAddress,
         final boolean useRelay) throws IOException {
@@ -305,7 +306,7 @@ public class P2P {
     public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
-        final SocketFactory socketFactory,
+        final SSLSocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
         final InetSocketAddress plainTextRelayAddress,
         final SessionSocketListener callSocketListener,
@@ -336,7 +337,7 @@ public class P2P {
     private static OfferAnswerFactory newIceOfferAnswerFactory(
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final InetSocketAddress serverAddress, 
-        final SocketFactory socketFactory, 
+        final SSLSocketFactory socketFactory, 
         final ServerSocketFactory serverSocketFactory,
         final boolean useRelay) throws IOException {
         
@@ -376,7 +377,7 @@ public class P2P {
             new IceMediaStreamFactoryImpl(stunCandidateProvider);
         //final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
         final UdpSocketFactory udpSocketFactory = 
-            new BarchartUdtSocketFactory();
+            new BarchartUdtSocketFactory(socketFactory);
         
         final MappedTcpAnswererServer answererServer =
             new MappedTcpAnswererServer(natPmpService, upnpService, 
