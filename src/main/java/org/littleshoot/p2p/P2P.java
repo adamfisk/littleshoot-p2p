@@ -248,7 +248,8 @@ public class P2P {
         final InetSocketAddress serverAddress) 
         throws IOException {
         return newXmppP2PHttpClient(protocol, natPmpService,
-            upnpService, serverAddress, (SSLSocketFactory) SSLSocketFactory.getDefault(),
+            upnpService, serverAddress, 
+            (SSLSocketFactory) SSLSocketFactory.getDefault(),
             ServerSocketFactory.getDefault(), serverAddress, true);
     }
     
@@ -285,6 +286,11 @@ public class P2P {
             plainTextRelayAddress, new SessionSocketListener() {
                 
                 public void onSocket(String id, Socket sock) throws IOException {
+                }
+
+                @Override
+                public void reconnected() {
+                    
                 }
             }, useRelay);
     }
