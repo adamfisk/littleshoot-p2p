@@ -462,6 +462,11 @@ public class P2P {
                     final PortMapListener portMapListener) {
                 return 0;
             }
+
+            @Override
+            public void shutdown() {
+                
+            }
         };
     }
 
@@ -475,6 +480,12 @@ public class P2P {
                     final int localPort, final int externalPortRequested,
                     final PortMapListener portMapListener) {
                 return 0;
+            }
+
+            @Override
+            public void shutdown() {
+                // TODO Auto-generated method stub
+                
             }
         };
     }
