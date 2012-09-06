@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.net.ServerSocketFactory;
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -312,7 +313,7 @@ public class P2P {
     public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
-        final SSLSocketFactory socketFactory,
+        final SocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
         final InetSocketAddress plainTextRelayAddress,
         final SessionSocketListener callSocketListener,
@@ -343,7 +344,7 @@ public class P2P {
     private static OfferAnswerFactory newIceOfferAnswerFactory(
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final InetSocketAddress serverAddress, 
-        final SSLSocketFactory socketFactory, 
+        final SocketFactory socketFactory, 
         final ServerSocketFactory serverSocketFactory,
         final boolean useRelay) throws IOException {
         
