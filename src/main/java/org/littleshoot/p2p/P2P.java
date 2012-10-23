@@ -17,6 +17,7 @@ import org.lastbamboo.common.ice.BarchartUdtSocketFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactoryImpl;
 import org.lastbamboo.common.ice.IceOfferAnswerFactory;
+import org.lastbamboo.common.ice.MappedServerSocket;
 import org.lastbamboo.common.ice.MappedTcpAnswererServer;
 import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
@@ -319,10 +320,41 @@ public class P2P {
         final SessionSocketListener callSocketListener,
         final boolean useRelay) throws IOException {
         log.info("Creating XMPP P2P instance");
+        final MappedTcpAnswererServer answererServer =
+            new MappedTcpAnswererServer(natPmpService, upnpService, 
+                serverAddress);
+        return newXmppP2PHttpClient(protocol, natPmpService, upnpService, 
+            answererServer, socketFactory, serverSocketFactory, 
+            plainTextRelayAddress, callSocketListener, useRelay);
+    }
+    
+    /**
+     * Creates a new LittleShoot P2P instance with a custom configuration file
+     * and allowing custom classes for NAT PMP and UPnP mappings. 
+     * 
+     * @param streamDesc A configuration class allowing the caller to specify
+     * things like whether or not the use TCP, UDP, and TURN relay connections.
+     * @param natPmpService The NAT PMP implementation.
+     * @param upnpService The UPnP implementation.
+     * @param socketFactory The factory for creating plain TCP sockets. This
+     * could be an SSL socket factory, for example, to create SSL connections
+     * to peers when connecting over TCP.
+     * @throws IOException If any of the necessary network configurations 
+     * cannot be established.
+     */
+    public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final MappedServerSocket mappedServer,
+        final SocketFactory socketFactory,
+        final ServerSocketFactory serverSocketFactory,
+        final InetSocketAddress plainTextRelayAddress,
+        final SessionSocketListener callSocketListener,
+        final boolean useRelay) throws IOException {
+        log.info("Creating XMPP P2P instance");
         
         final OfferAnswerFactory offerAnswerFactory = 
             newIceOfferAnswerFactory(natPmpService, upnpService,
-                serverAddress, socketFactory, serverSocketFactory, useRelay);
+                mappedServer, socketFactory, serverSocketFactory, useRelay);
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = 
@@ -347,6 +379,21 @@ public class P2P {
         final SocketFactory socketFactory, 
         final ServerSocketFactory serverSocketFactory,
         final boolean useRelay) throws IOException {
+        
+        final MappedServerSocket answererServer =
+            new MappedTcpAnswererServer(natPmpService, upnpService, 
+                serverAddress);
+        
+        return newIceOfferAnswerFactory(natPmpService, upnpService, 
+            answererServer, socketFactory, serverSocketFactory, useRelay);
+    }
+
+    private static OfferAnswerFactory newIceOfferAnswerFactory(
+        final NatPmpService natPmpService, final UpnpService upnpService, 
+        final MappedServerSocket answererServer, 
+        final SocketFactory socketFactory, 
+        final ServerSocketFactory serverSocketFactory,
+        final boolean useRelay) {
         
         // We hard-code this instead of looking it up to avoid the DNS
         // control point.
@@ -386,22 +433,22 @@ public class P2P {
         final UdpSocketFactory udpSocketFactory = 
             new BarchartUdtSocketFactory(socketFactory);
         
-        final MappedTcpAnswererServer answererServer =
-            new MappedTcpAnswererServer(natPmpService, upnpService, 
-                serverAddress);
+        //final MappedTcpAnswererServer answererServer =
+          //  new MappedTcpAnswererServer(natPmpService, upnpService, 
+            //    serverAddress);
         
         final MappedTcpOffererServerPool offererServer =
             new MappedTcpOffererServerPool(natPmpService, upnpService,
                 serverSocketFactory);
 
         final TurnClientListener clientListener =
-            new ServerDataFeeder(serverAddress);
+            new ServerDataFeeder(answererServer.getHostAddress());
         
         return new IceOfferAnswerFactory(mediaStreamFactory, udpSocketFactory, 
             turnCandidateProvider, answererServer, clientListener, 
             stunCandidateProvider, offererServer, socketFactory);
     }
-
+    
     private static SipClientLauncher newSipClientLauncher(
         final SipClientTracker sipClientTracker, 
         final OfferAnswerFactory offerAnswerFactory, 
