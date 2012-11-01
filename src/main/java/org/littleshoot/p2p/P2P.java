@@ -373,6 +373,55 @@ public class P2P {
         return client;
     }
     
+    /**
+     * Creates a new LittleShoot P2P instance with a custom configuration file
+     * and allowing custom classes for NAT PMP and UPnP mappings. 
+     * 
+     * @param streamDesc A configuration class allowing the caller to specify
+     * things like whether or not the use TCP, UDP, and TURN relay connections.
+     * @param natPmpService The NAT PMP implementation.
+     * @param upnpService The UPnP implementation.
+     * @param socketFactory The factory for creating plain TCP sockets. This
+     * could be an SSL socket factory, for example, to create SSL connections
+     * to peers when connecting over TCP.
+     * @throws IOException If any of the necessary network configurations 
+     * cannot be established.
+     */
+    public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
+        final NatPmpService natPmpService, final UpnpService upnpService,
+        final InetSocketAddress serverAddress,
+        final SocketFactory socketFactory,
+        final ServerSocketFactory serverSocketFactory,
+        final InetSocketAddress plainTextRelayAddress,
+        final SessionSocketListener callSocketListener,
+        final boolean useRelay, final String host, final int port, 
+        final String serviceName) throws IOException {
+        log.info("Creating XMPP P2P instance");
+        
+        final MappedTcpAnswererServer mappedServer =
+            new MappedTcpAnswererServer(natPmpService, upnpService, 
+                serverAddress);
+        final OfferAnswerFactory offerAnswerFactory = 
+            newIceOfferAnswerFactory(natPmpService, upnpService,
+                mappedServer, socketFactory, serverSocketFactory, useRelay);
+
+        // Now construct all the XMPP classes and link them to HTTP client.
+        final XmppP2PClient client = 
+            ControlXmppP2PClient.newClient(offerAnswerFactory,
+                plainTextRelayAddress, callSocketListener, 
+                DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
+                socketFactory, host, port, serviceName);
+        
+        if (StringUtils.isNotBlank(protocol)) {
+            final ProtocolSocketFactory sf = 
+                new XmppProtocolSocketFactory(client, 
+                    new DefaultXmppUriFactory());
+            final Protocol sipProtocol = new Protocol(protocol, sf, 80);
+            Protocol.registerProtocol(protocol, sipProtocol);
+        }
+        return client;
+    }
+    
     private static OfferAnswerFactory newIceOfferAnswerFactory(
         final NatPmpService natPmpService, final UpnpService upnpService, 
         final InetSocketAddress serverAddress, 
