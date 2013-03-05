@@ -209,7 +209,7 @@ public class P2PEndpoints {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
+    public static XmppP2PClient<FiveTuple> newXmppP2PHttpClient(final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final MappedServerSocket mappedServer,
         final SocketFactory socketFactory,
@@ -225,7 +225,7 @@ public class P2PEndpoints {
                 mappedServer, socketFactory, serverSocketFactory, useRelay);
 
         // Now construct all the XMPP classes and link them to HTTP client.
-        final XmppP2PClient client = 
+        final XmppP2PClient<FiveTuple> client = 
             ControlEndpointXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
                 DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
