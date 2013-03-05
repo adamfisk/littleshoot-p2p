@@ -22,6 +22,7 @@ import org.lastbamboo.common.ice.MappedTcpAnswererServer;
 import org.lastbamboo.common.ice.MappedTcpOffererServerPool;
 import org.lastbamboo.common.ice.UdpSocketFactory;
 import org.lastbamboo.common.offer.answer.OfferAnswerFactory;
+import org.lastbamboo.common.offer.answer.OfferAnswerListener;
 import org.lastbamboo.common.p2p.P2PClient;
 import org.lastbamboo.common.portmapping.NatPmpService;
 import org.lastbamboo.common.portmapping.PortMapListener;
@@ -31,7 +32,7 @@ import org.lastbamboo.common.stun.client.PublicIpAddress;
 import org.lastbamboo.common.stun.client.StunServerRepository;
 import org.lastbamboo.common.turn.client.TurnClientListener;
 import org.lastbamboo.common.turn.http.server.ServerDataFeeder;
-import org.littleshoot.commom.xmpp.ControlXmppP2PClient;
+import org.littleshoot.commom.xmpp.ControlEndpointXmppP2PClient;
 import org.littleshoot.commom.xmpp.DefaultXmppUriFactory;
 import org.littleshoot.commom.xmpp.XmppP2PClient;
 import org.littleshoot.commom.xmpp.XmppProtocolSocketFactory;
@@ -83,9 +84,10 @@ public class P2PEndpoints {
      * cannot be established.
      */
     public static XmppP2PClient newXmppP2PHttpClient(
-        final InetSocketAddress serverAddress) throws IOException {
+        final InetSocketAddress serverAddress,
+        final OfferAnswerListener<FiveTuple> answererListener) throws IOException {
         return newXmppP2PHttpClient("shoot", emptyNatPmpService(), 
-            emptyUpnpService(), serverAddress);
+            emptyUpnpService(), serverAddress, answererListener);
     }
     
     /**
@@ -98,20 +100,23 @@ public class P2PEndpoints {
      * cannot be established.
      */
     public static P2PClient newXmppP2PHttpClient(final String protocol,
-        final InetSocketAddress serverAddress) throws IOException {
+        final InetSocketAddress serverAddress,
+        final OfferAnswerListener<FiveTuple> answererListener) throws IOException {
         return newXmppP2PHttpClient(protocol, emptyNatPmpService(), 
-            emptyUpnpService(), serverAddress);
+            emptyUpnpService(), serverAddress, answererListener);
     }
     
     public static XmppP2PClient newXmppP2PHttpClient(
         final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
-        final InetSocketAddress serverAddress) 
+        final InetSocketAddress serverAddress,
+        final OfferAnswerListener<FiveTuple> answererListener) 
         throws IOException {
         return newXmppP2PHttpClient(protocol, natPmpService,
             upnpService, serverAddress, 
             (SSLSocketFactory) SSLSocketFactory.getDefault(),
-            ServerSocketFactory.getDefault(), serverAddress, true);
+            ServerSocketFactory.getDefault(), serverAddress, true,
+            answererListener);
     }
     
     /**
@@ -134,7 +139,8 @@ public class P2PEndpoints {
         final SSLSocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
         final InetSocketAddress plainTextRelayAddress,
-        final boolean useRelay) throws IOException {
+        final boolean useRelay,
+        final OfferAnswerListener<FiveTuple> answererListener) throws IOException {
         log.info("Creating XMPP P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -153,7 +159,7 @@ public class P2PEndpoints {
                 public void reconnected() {
                     
                 }
-            }, useRelay);
+            }, useRelay, answererListener);
     }
     
     /**
@@ -177,14 +183,16 @@ public class P2PEndpoints {
         final ServerSocketFactory serverSocketFactory,
         final InetSocketAddress plainTextRelayAddress,
         final SessionSocketListener callSocketListener,
-        final boolean useRelay) throws IOException {
+        final boolean useRelay,
+        final OfferAnswerListener<FiveTuple> answererListener) throws IOException {
         log.info("Creating XMPP P2P instance");
         final MappedTcpAnswererServer answererServer =
             new MappedTcpAnswererServer(natPmpService, upnpService, 
                 serverAddress);
         return newXmppP2PHttpClient(protocol, natPmpService, upnpService, 
             answererServer, socketFactory, serverSocketFactory, 
-            plainTextRelayAddress, callSocketListener, useRelay);
+            plainTextRelayAddress, callSocketListener, useRelay,
+            answererListener);
     }
     
     /**
@@ -208,7 +216,8 @@ public class P2PEndpoints {
         final ServerSocketFactory serverSocketFactory,
         final InetSocketAddress plainTextRelayAddress,
         final SessionSocketListener callSocketListener,
-        final boolean useRelay) throws IOException {
+        final boolean useRelay,
+        final OfferAnswerListener<FiveTuple> answererListener) throws IOException {
         log.debug("Creating XMPP P2P instance");
         
         final OfferAnswerFactory<FiveTuple> offerAnswerFactory = 
@@ -217,11 +226,12 @@ public class P2PEndpoints {
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = 
-            ControlXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
+            ControlEndpointXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
                 DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
-                socketFactory);
+                socketFactory, answererListener);
         
+        /*
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
                 new XmppProtocolSocketFactory(client, 
@@ -229,6 +239,7 @@ public class P2PEndpoints {
             final Protocol sipProtocol = new Protocol(protocol, sf, 80);
             Protocol.registerProtocol(protocol, sipProtocol);
         }
+        */
         return client;
     }
     
@@ -254,8 +265,9 @@ public class P2PEndpoints {
         final InetSocketAddress plainTextRelayAddress,
         final SessionSocketListener callSocketListener,
         final boolean useRelay, final String host, final int port, 
-        final String serviceName) throws IOException {
-        log.info("Creating XMPP P2P instance");
+        final String serviceName,
+        final OfferAnswerListener<FiveTuple> answererListener) throws IOException {
+        log.debug("Creating XMPP P2P instance");
         
         final MappedTcpAnswererServer mappedServer =
             new MappedTcpAnswererServer(natPmpService, upnpService, 
@@ -266,18 +278,20 @@ public class P2PEndpoints {
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient client = 
-            ControlXmppP2PClient.newClient(offerAnswerFactory,
+            ControlEndpointXmppP2PClient.newClient(offerAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
                 DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
-                socketFactory, host, port, serviceName);
+                socketFactory, host, port, serviceName, answererListener);
         
+        /*
         if (StringUtils.isNotBlank(protocol)) {
             final ProtocolSocketFactory sf = 
                 new XmppProtocolSocketFactory(client, 
                     new DefaultXmppUriFactory());
-            final Protocol sipProtocol = new Protocol(protocol, sf, 80);
-            Protocol.registerProtocol(protocol, sipProtocol);
+            final Protocol proto = new Protocol(protocol, sf, 80);
+            Protocol.registerProtocol(protocol, proto);
         }
+        */
         return client;
     }
 
