@@ -13,6 +13,7 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.lang.StringUtils;
+import org.lastbamboo.common.ice.BarchartUdtSocketFactory;
 import org.lastbamboo.common.ice.EndpointFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactory;
 import org.lastbamboo.common.ice.IceMediaStreamFactoryImpl;
@@ -223,10 +224,15 @@ public class P2PEndpoints {
         final OfferAnswerFactory<FiveTuple> offerAnswerFactory = 
             newIceOfferAnswerFactory(natPmpService, upnpService,
                 mappedServer, socketFactory, serverSocketFactory, useRelay);
+        
+        final OfferAnswerFactory<Socket> socketOfferAnswerFactory = 
+                newIceSocketOfferAnswerFactory(natPmpService, upnpService,
+                    mappedServer, socketFactory, serverSocketFactory, useRelay);
 
         // Now construct all the XMPP classes and link them to HTTP client.
         final XmppP2PClient<FiveTuple> client = 
             ControlEndpointXmppP2PClient.newGoogleTalkDirectClient(offerAnswerFactory,
+                    socketOfferAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
                 DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
                 socketFactory, answererListener);
@@ -257,7 +263,8 @@ public class P2PEndpoints {
      * @throws IOException If any of the necessary network configurations 
      * cannot be established.
      */
-    public static XmppP2PClient newXmppP2PHttpClient(final String protocol, 
+    public static XmppP2PClient<FiveTuple> newXmppP2PHttpClient(
+        final String protocol, 
         final NatPmpService natPmpService, final UpnpService upnpService,
         final InetSocketAddress serverAddress,
         final SocketFactory socketFactory,
@@ -275,10 +282,16 @@ public class P2PEndpoints {
         final OfferAnswerFactory<FiveTuple> offerAnswerFactory = 
             newIceOfferAnswerFactory(natPmpService, upnpService,
                 mappedServer, socketFactory, serverSocketFactory, useRelay);
+        
+        
+        final OfferAnswerFactory<Socket> socketOfferAnswerFactory = 
+                newIceSocketOfferAnswerFactory(natPmpService, upnpService,
+                    mappedServer, socketFactory, serverSocketFactory, useRelay);
 
         // Now construct all the XMPP classes and link them to HTTP client.
-        final XmppP2PClient client = 
+        final XmppP2PClient<FiveTuple> client = 
             ControlEndpointXmppP2PClient.newClient(offerAnswerFactory,
+                    socketOfferAnswerFactory,
                 plainTextRelayAddress, callSocketListener, 
                 DEFAULT_RELAY_WAIT_TIME, new PublicIpAddress(), 
                 socketFactory, host, port, serviceName, answererListener);
@@ -293,6 +306,68 @@ public class P2PEndpoints {
         }
         */
         return client;
+    }
+    
+
+    private static OfferAnswerFactory<Socket> newIceSocketOfferAnswerFactory(
+        final NatPmpService natPmpService, final UpnpService upnpService, 
+        final MappedServerSocket answererServer, 
+        final SocketFactory socketFactory, 
+        final ServerSocketFactory serverSocketFactory,
+        final boolean useRelay) {
+        
+        // We hard-code this instead of looking it up to avoid the DNS
+        // control point.
+        final CandidateProvider<InetSocketAddress> stunCandidateProvider =
+            new CandidateProvider<InetSocketAddress>() {
+
+                public Collection<InetSocketAddress> getCandidates() {
+                    return StunServerRepository.getServers();
+                }
+
+                public InetSocketAddress getCandidate() {
+                    return getCandidates().iterator().next();
+                }
+            };
+        //final CandidateProvider<InetSocketAddress> stunCandidateProvider =
+        //    new DnsSrvCandidateProvider("_stun._udp.littleshoot.org");
+        final CandidateProvider<InetSocketAddress> turnCandidateProvider;
+        if (useRelay) {
+            turnCandidateProvider =
+                new DnsSrvCandidateProvider("_turn._tcp.littleshoot.org");
+        } else {
+            turnCandidateProvider = new CandidateProvider<InetSocketAddress>() {
+                @Override
+                public Collection<InetSocketAddress> getCandidates() {
+                    return new ArrayList<InetSocketAddress>(0);
+                }
+                @Override
+                public InetSocketAddress getCandidate() {
+                    return null;
+                }
+            };
+        }
+    
+        final IceMediaStreamFactory mediaStreamFactory = 
+            new IceMediaStreamFactoryImpl(stunCandidateProvider);
+        //final UdpSocketFactory udpSocketFactory = new UdtSocketFactory();
+        final UdpSocketFactory<Socket> udpSocketFactory = 
+            new BarchartUdtSocketFactory(socketFactory);
+        
+        //final MappedTcpAnswererServer answererServer =
+          //  new MappedTcpAnswererServer(natPmpService, upnpService, 
+            //    serverAddress);
+        
+        final MappedTcpOffererServerPool offererServer =
+            new MappedTcpOffererServerPool(natPmpService, upnpService,
+                serverSocketFactory);
+
+        final TurnClientListener clientListener =
+            new ServerDataFeeder(answererServer.getHostAddress());
+        
+        return new IceOfferAnswerFactory<Socket>(mediaStreamFactory, udpSocketFactory, 
+            turnCandidateProvider, answererServer, clientListener, 
+            stunCandidateProvider, offererServer, socketFactory);
     }
 
     private static OfferAnswerFactory<FiveTuple> newIceOfferAnswerFactory(
