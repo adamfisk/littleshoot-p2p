@@ -3,14 +3,14 @@
     <groupId>org.littleshoot</groupId>
     <artifactId>p2p</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>LittleShoot P2P Stack</name>
     <url>http://www.littleshoot.org</url>
 
     <parent>
         <groupId>org.littleshoot</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <scm>
