@@ -3,14 +3,14 @@
     <groupId>org.littleshoot</groupId>
     <artifactId>p2p</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>LittleShoot P2P Stack</name>
     <url>http://www.littleshoot.org</url>
 
     <parent>
         <groupId>org.littleshoot</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.3</version>
     </parent>
 
     <scm>
@@ -44,54 +44,55 @@
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>littleshoot-ice</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>jlibtorrent</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>mina-port</artifactId>
+            <version>1.4</version>
         </dependency>
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>sip-bootstrap</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>sip-http-client</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>turn-client</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>udt</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>util</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>xmpp</artifactId>
-            <version>${project.version}</version>
+            <version>${ls.version}</version>
         </dependency> 
 
     </dependencies>
