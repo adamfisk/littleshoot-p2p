@@ -27,6 +27,7 @@ import org.lastbamboo.common.portmapping.NatPmpService;
 import org.lastbamboo.common.portmapping.PortMapListener;
 import org.lastbamboo.common.portmapping.PortMappingProtocol;
 import org.lastbamboo.common.portmapping.UpnpService;
+/*
 import org.lastbamboo.common.sip.bootstrap.ProxyRegistrarFactory;
 import org.lastbamboo.common.sip.bootstrap.ProxyRegistrarFactoryImpl;
 import org.lastbamboo.common.sip.bootstrap.RobustProxyRegistrarFactory;
@@ -48,6 +49,7 @@ import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayer;
 import org.lastbamboo.common.sip.stack.transport.SipTcpTransportLayerImpl;
 import org.lastbamboo.common.sip.stack.util.UriUtils;
 import org.lastbamboo.common.sip.stack.util.UriUtilsImpl;
+*/
 import org.lastbamboo.common.stun.client.PublicIpAddress;
 import org.lastbamboo.common.stun.client.StunServerRepository;
 import org.lastbamboo.common.turn.client.TurnClientListener;
@@ -184,6 +186,7 @@ public class P2PSockets {
         final SSLSocketFactory socketFactory,
         final ServerSocketFactory serverSocketFactory,
         final SessionSocketListener callSocketListener) throws IOException {
+        /*
         log.info("Creating P2P instance");
         
         // This listener listens for sockets the server side of P2P and 
@@ -212,6 +215,8 @@ public class P2PSockets {
             Protocol.registerProtocol(protocol, sipProtocol);
         }
         return client;
+        */
+        return null;
     }
     
     /**
@@ -498,6 +503,7 @@ public class P2PSockets {
             stunCandidateProvider, offererServer, socketFactory);
     }
     
+    /*
     private static SipClientLauncher newSipClientLauncher(
         final SipClientTracker sipClientTracker, 
         final OfferAnswerFactory offerAnswerFactory, 
@@ -547,6 +553,7 @@ public class P2PSockets {
         return new SipClientLauncher(sipClientTracker, robustRegistrarFactory, 
             offerAnswerFactory, relayWaitTime);
     }
+    */
     
     private static NatPmpService emptyNatPmpService() {
         return new NatPmpService() {

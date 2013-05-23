@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.littleshoot</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </parent>
 
     <scm>
@@ -24,7 +24,7 @@
       <dependency>
         <groupId>com.barchart.udt</groupId>
         <artifactId>barchart-udt-bundle</artifactId>
-        <version>2.2.5</version>
+        <version>2.3.0</version>
       </dependency>
 
 <!--
@@ -59,6 +59,7 @@
             <version>1.4</version>
         </dependency>
 
+<!--
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>sip-bootstrap</artifactId>
@@ -70,6 +71,7 @@
             <artifactId>sip-http-client</artifactId>
             <version>${ls.version}</version>
         </dependency> 
+-->
 
         <dependency>
             <groupId>org.littleshoot</groupId>
