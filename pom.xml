@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>littleshoot-ice</artifactId>
-            <version>${ls.version}</version>
+            <version>1.0.4</version>
         </dependency> 
 
         <dependency>
