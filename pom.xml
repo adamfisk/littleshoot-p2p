@@ -21,6 +21,18 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.littleshoot</groupId>
+            <artifactId>xmpp</artifactId>
+            <version>1.0.4</version>
+        </dependency> 
+
+        <dependency>
+            <groupId>org.littleshoot</groupId>
+            <artifactId>littleshoot-ice</artifactId>
+            <version>1.0.4</version>
+        </dependency> 
+
       <dependency>
         <groupId>com.barchart.udt</groupId>
         <artifactId>barchart-udt-bundle</artifactId>
@@ -40,12 +52,6 @@
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.littleshoot</groupId>
-            <artifactId>littleshoot-ice</artifactId>
-            <version>1.0.4</version>
-        </dependency> 
 
         <dependency>
             <groupId>org.littleshoot</groupId>
@@ -88,12 +94,6 @@
         <dependency>
             <groupId>org.littleshoot</groupId>
             <artifactId>util</artifactId>
-            <version>${ls.version}</version>
-        </dependency> 
-
-        <dependency>
-            <groupId>org.littleshoot</groupId>
-            <artifactId>xmpp</artifactId>
             <version>${ls.version}</version>
         </dependency> 
 
