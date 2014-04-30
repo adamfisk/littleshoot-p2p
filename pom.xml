@@ -3,7 +3,7 @@
     <groupId>org.littleshoot</groupId>
     <artifactId>p2p</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.0.11</version>
     <name>LittleShoot P2P Stack</name>
     <url>http://www.littleshoot.org</url>
 
